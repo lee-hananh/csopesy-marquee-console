@@ -24,6 +24,7 @@ void clearScreen() {
     std::cout << "\033[2J\033[1;1H";
 }
 
+//set console position
 void gotoRC(int row, int col = 0) {
     COORD pos = { (SHORT)col, (SHORT)row };
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
@@ -90,6 +91,7 @@ void setText(const std::string& text){
 
 //TO DO: add functions for exit and set speed
 
+//allows continue typing while marquee running
 std::string readCommandLine() {
     gotoRC(commandRow, 0);
     std::cout << "Command> " << std::string(60, ' ');
