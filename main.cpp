@@ -91,6 +91,11 @@ void setText(const std::string& text){
 
 //TO DO: add functions for exit and set speed
 
+void setSpeed(int speed){
+    if (speed > 0)
+        marqueeSpeed = speed;
+}
+
 //allows continue typing while marquee running
 std::string readCommandLine() {
     gotoRC(commandRow, 0);
@@ -155,9 +160,11 @@ int main() {
             if (!text.empty() && text[0] == ' ') text.erase(0, 1);
             setText(text);
         } else if (command == "set_speed") {
-
-            // to be filled
-
+            int speed;
+            if (ss >> speed)
+                setSpeed(speed);
+            else
+                std::cout << "Invalid speed value. Provide only positive speed values in milliseconds (e.g., set_speed 100)\n";
         } else if (command == "exit") {
             std::cout << "Exiting Marquee Operator...\n";
             isRunning = false;
