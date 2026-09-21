@@ -1,1 +1,1 @@
-# csopesy-marquee-console
+# csopesy-marquee-console-activity
