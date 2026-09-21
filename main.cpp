@@ -62,18 +62,12 @@ int main() {
 
         if (command == "help") {
             displayHelp();
-        } else if (command == "start_marquee") {
-            std::cout << "This feature is to be implemented in a future version. Only 'help', 'set_text', and 'exit' are implemented in this version.\n";
-        } else if (command == "stop_marquee") {
-            std::cout << "This feature is to be implemented in a future version. Only 'help', 'set_text', and 'exit' are implemented in this version.\n";
         } else if (command == "set_text") {
             std::string text;
             std::getline(ss, text);
             if (!text.empty() && text[0] == ' ') text.erase(0, 1);
             marqueeText = text;
             std::cout << "Text saved for marquee: " << marqueeText << "\n\n";
-        } else if (command == "set_speed") {
-            std::cout << "This feature is to be implemented in a future version. Only 'help', 'set_text', and 'exit' are implemented in this version.\n";
         } else if (command == "exit") {
             std::cout << "Terminating console...\n";
             isRunning = false;
