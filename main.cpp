@@ -37,7 +37,7 @@ void displayHeader() {
     std::cout << " - Guillermo, Iain\n";
     std::cout << " - Lee, Hannah\n";
     std::cout << " - Lim, Jenrick\n";
-    std::cout << "Version Date: 2026-09-24\n";
+    std::cout << "Version Date: 2026-09-25\n";
     gotoRC(marqueeRow, 0);
     std::cout<<marqueeText<< std::flush;
 }
@@ -54,7 +54,15 @@ void clearOutput() {
     for (int i = 0; i < 10; i++)
         clearRow(headerRow + 1 + i);
 
+    clearRow(commandRow + 1);
     gotoRC(headerRow + 2, 0);
+}
+
+// displays command feedback
+void displayFeedback(const std::string& message) {
+    clearRow(commandRow + 1);
+    gotoRC(commandRow + 1, 0);
+    std::cout << message;
 }
 
 // displays available commands
@@ -69,7 +77,7 @@ void displayHelp() {
     std::cout << "  exit          - Terminates the console\n\n";
 }
 
-//this makes the text move
+// this makes the text move
 void marqueeLoop(){
     while(running){
         std::string text;
@@ -86,20 +94,14 @@ void marqueeLoop(){
     }
 }
 
+// starts the marquee
 void startMarquee(){
-    if(running) {
-        std::cout << "Marquee is already running.";
-        return;
-    }
     running = true;
     marqueeThread = std::thread(marqueeLoop);
 }
 
+// stops the marquee
 void stopMarquee(){
-    if(!running) {
-        std::cout << "Marquee is already not running.";
-        return;
-    }
     running = false;
     if(marqueeThread.joinable()){
         marqueeThread.join();
@@ -113,11 +115,14 @@ void setText(const std::string& text){
 }
 
 // sets the speed of the marquee
-void setSpeed(int speed){
-    if (speed > 0)
+bool setSpeed(int speed){
+    if (speed > 0) {
         marqueeSpeed = speed;
-    else 
-        std::cout << "Invalid value. Provide only positive speed values (numbers) in milliseconds (e.g., set_speed 100)\n";
+        return true;
+    } else {
+        displayFeedback("Invalid value. Provide only positive speed values (numbers) in milliseconds (e.g., set_speed 100)");
+        return false;
+    }
 }
 
 // allows continue typing while marquee running
@@ -128,6 +133,10 @@ std::string readCommandLine() {
     while (true) {
         if (_kbhit()) {
             char ch = _getch();
+            if (ch == 0 || ch == (char)0xE0) {
+                _getch(); // disregards extended key code (ex: arrows, F-keys, etc.)
+                continue;
+            }
             gotoRC(commandRow, 9 + (int)buffer.length());
             if (ch == '\r') {
                 break;
@@ -138,7 +147,7 @@ std::string readCommandLine() {
                     std::cout << ' ';
                     gotoRC(commandRow, 9 + (int)buffer.length());
                 }
-            } else {
+            } else if (isprint((unsigned char)ch)) {
                 buffer += ch;
                 std::cout << ch;
             }
@@ -175,26 +184,45 @@ int main() {
         if (command == "help") {
             displayHelp();
         } else if (command == "start_marquee") {
-            startMarquee(); 
+            if (running)
+                displayFeedback("Marquee is already running.");
+            else {
+                startMarquee();
+                displayFeedback("Marquee has started.");
+            }
         } else if (command == "stop_marquee") {
-            stopMarquee();
+            if (!running)
+                displayFeedback("Marquee is already not running.");
+            else {
+                stopMarquee();
+                displayFeedback("Marquee has stopped.");
+            }
         } else if (command == "set_text") {
             std::string text;
             std::getline(ss, text);
             if (!text.empty() && text[0] == ' ') text.erase(0, 1);
-            setText(text);
+            if (text.empty()) {
+                displayFeedback("Invalid value. Provide a non-empty text (e.g., set_text Hello)");
+            } else {
+                setText(text);
+                displayFeedback("Marquee text has been updated to '" + text + "'. The updated text will show in the next cycle.");
+            }
         } else if (command == "set_speed") {
             int speed;
-            if (ss >> speed)
-                setSpeed(speed);
-            else
-                std::cout << "Invalid value. Provide only positive speed values (numbers) in milliseconds (e.g., set_speed 100)\n";
+            if (ss >> speed) {
+                if (setSpeed(speed))
+                    displayFeedback("Marquee speed has been updated to " + std::to_string(speed) + " ms.");
+            } else {
+                displayFeedback("Invalid value. Provide only positive speed values (numbers) in milliseconds (e.g., set_speed 100)\n");
+            }
         } else if (command == "exit") {
-            std::cout << "Exiting Marquee Operator...\n";
-            stopMarquee();
+            displayFeedback("Exiting Marquee Operator...\n");
+            if (running)
+                stopMarquee();
+            clearOutput();
             isRunning = false;
         } else if (!command.empty()) {
-            std::cout << "Unrecognized command. Type 'help' for commands.\n";
+            displayFeedback("Unrecognized command. Type 'help' for commands.\n");
         }
     }
 
