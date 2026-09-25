@@ -201,7 +201,7 @@ int main() {
             std::string text;
             std::getline(ss, text);
             if (!text.empty() && text[0] == ' ') text.erase(0, 1);
-            if (text.empty()) {
+            if (text.find_first_not_of(' ') == std::string::npos) {     // returns std::string::npos if input is empty or just whitespace
                 displayFeedback("Invalid value. Provide a non-empty text (e.g., set_text Hello)");
             } else {
                 setText(text);
